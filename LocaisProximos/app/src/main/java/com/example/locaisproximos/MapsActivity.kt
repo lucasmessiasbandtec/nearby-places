@@ -19,7 +19,10 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_maps.*
 import retrofit2.Call
 import retrofit2.Response
@@ -50,8 +53,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     internal lateinit var currentPlace:MyPlaces
 
-    lateinit var filtro:String
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
@@ -62,7 +63,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //Init Service
         mService = Common.googleApiService
-
 
         //Request runtime permission
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -82,21 +82,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
         }
 
-
-
         bottom_navigation_view.setOnNavigationItemSelectedListener { item->
             when(item.itemId) {
-                R.id.action_hospital -> filtro = "hospital"
-                R.id.action_market -> filtro = "market"
-                R.id.action_restaurant -> filtro = "restaurant"
-                R.id.action_school -> filtro = "school"
+                R.id.action_hospital -> nearByPlace ("hospital")
+                R.id.action_market -> nearByPlace ("market")
+                R.id.action_restaurant -> nearByPlace ("restaurant")
+                R.id.action_school -> nearByPlace ("school")
             }
             true
 
-        }
-
-        mMap.setOnCameraMoveListener {
-            nearByPlace(filtro)
         }
 
     }
@@ -106,9 +100,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //Clear all marker on Map
         mMap.clear()
         //Build URL request base on location
-        val location: VisibleRegion = mMap.projection.visibleRegion
-
-        val url = getUrl(location.latLngBounds.center.latitude,location.latLngBounds.center.longitude,typePlace)
+        val url = getUrl(latitude,longitude,typePlace)
 
         mService.getNearbyPlaces(url)
             .enqueue(object : retrofit2.Callback<MyPlaces>{
@@ -129,13 +121,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             markerOptions.position(latLng)
                             markerOptions.title(placeName)
                             if(typePlace.equals("hospital"))
-                                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA))
-                            else if (typePlace.equals("market"))
-                                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
-                            else if (typePlace.equals("restaurant"))
-                                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
-                            else if (typePlace.equals("school"))
                                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                            else if (typePlace.equals("market"))
+                                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                            else if (typePlace.equals("restaurant"))
+                                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                            else if (typePlace.equals("school"))
+                                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                             else
                                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
 
