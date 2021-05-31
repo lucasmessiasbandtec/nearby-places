@@ -1,5 +1,6 @@
 package com.example.locaisproximos
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
@@ -265,5 +266,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //Enable Zoom control
         mMap.uiSettings.isZoomControlsEnabled=true
+
+        //Make event click on Map
+
+        mMap!!.setOnMarkerClickListener { marker ->
+            //when user select marker, just get result from a place assign to static variable
+            Common.currentResult = currentPlace!!.results!![Integer.parseInt(marker.snippet)]
+            //Start new Activity
+            startActivity(Intent(this@MapsActivity,ViewPlace::class.java))
+            true
+
+        }
     }
 }
